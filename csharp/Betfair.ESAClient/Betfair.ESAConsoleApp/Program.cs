@@ -86,6 +86,7 @@ namespace Betfair.ESAConsoleApp {
         private static void OnMarketChanged(object sender, MarketChangedEventArgs e) {
             if (!_traceMarkets)
                 return;
+            //logic here to write market snapshots to concurrent queue to pass to a trading strategy
             PrintMarket(e.Snap);
         }
 
@@ -171,7 +172,7 @@ namespace Betfair.ESAConsoleApp {
 
         [Command(description: "Market - subscribes to a market")]
         public void Market(string marketid) {
-            ClientCache.SubscribeMarkets(marketid);
+            ClientCache.SubscribeMarkets(marketid.Split(' '));
         }
 
         [Command(description: "Market Firehose- subscribes to all markets")]
