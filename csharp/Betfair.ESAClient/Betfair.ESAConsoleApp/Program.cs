@@ -13,6 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Betfair.ESAConsoleApp {
     internal class Program {
@@ -22,36 +24,15 @@ namespace Betfair.ESAConsoleApp {
         private static bool _traceOrders;
         private static string _host = "stream-api-integration.betfair.com";
         private static int _port = 443;
-        private readonly ILogger<Program> _logger;
+       
 
-        private static void Main(string[] args) {
 
-            var host = Host.CreateDefaultBuilder(args)
-               .ConfigureLogging(logging => {
-                   logging.ClearProviders();
-                   logging.AddSerilog(new LoggerConfiguration()
-                       .MinimumLevel.Debug()
-                       .WriteTo.File(@"C:\logs\log-.txt", rollingInterval: RollingInterval.Day)
-                       .CreateLogger());
-               })
-               .ConfigureServices((context, services) => {
-                   
-                   services.AddSingleton<Program>();
-                   
-               })
-               .Build();
+        
 
-            // Run the app by resolving services
-            var program = host.Services.GetRequiredService<Program>();
-            
-            program.Run(args);
-
-        }
-
+        // This method will be called by our App class (which will be a hosted service)
         public void Run(string[] args)
         {
-
-            _logger.LogInformation("Application started");
+            
 
             var traceListener = new ConsoleTraceListener();
             traceListener.TraceOutputOptions = TraceOptions.DateTime;
@@ -67,12 +48,32 @@ namespace Betfair.ESAConsoleApp {
             }
         }
 
-        public Program(ILogger<Program> logger)
+        public static void Main(string[] args)
         {
-            _logger = logger;
+            // Build and run the host
+            CreateHostBuilder(args).Build().Run();
         }
 
-        static Program() {
+        // Static method to handle logging and DI
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddSerilog(new LoggerConfiguration()
+                        .MinimumLevel.Debug()
+                        .WriteTo.File(@"C:\logs\log-.txt", rollingInterval: RollingInterval.Day)
+                        .CreateLogger());
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    // Register Program class as a singleton service
+                    services.AddSingleton<Program>();
+                    services.AddHostedService<App>(); // Register our new App class as a hosted service
+                });
+
+
+         static Program() {
             if (Settings.Default.AppKey != "") {
                 Console.WriteLine("Loading login details:");
                 NewSessionProvider(Settings.Default.SsoHost,
@@ -264,4 +265,33 @@ namespace Betfair.ESAConsoleApp {
             ClientCache.Client.TraceChangeTruncation = 0;
         }
     }
+
+    internal class App : IHostedService
+    {
+        private readonly Program _program;
+        private readonly ILogger<App> _logger;
+
+        // Constructor for App class
+        public App(Program program, ILogger<App> logger)
+        {
+            _program = program;
+            _logger = logger;
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            // Start the application
+            _logger.LogInformation("App is starting...");
+            _program.Run(new string[0]); // Pass any arguments here if needed
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("App is stopping...");
+            return Task.CompletedTask;
+        }
+    }
+
+
 }

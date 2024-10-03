@@ -68,6 +68,10 @@
       <Project>{84a4f60c-5348-4ea0-849c-e6a1b204ec28}</Project>
       <Name>Betfair.ESASwagger</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TradingStrategies\TradingStrategies.csproj">
+      <Project>{96d05a11-1b20-4494-a4a9-69901643111a}</Project>
+      <Name>TradingStrategies</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ConsoleTables" Version="2.4.2" />
