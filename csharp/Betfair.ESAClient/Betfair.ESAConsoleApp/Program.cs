@@ -9,6 +9,10 @@ using Betfair.ESAConsoleApp.Properties;
 using ConsoleTables;
 using Tectil.NCommand;
 using Tectil.NCommand.Contract;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Betfair.ESAConsoleApp {
     internal class Program {
@@ -18,8 +22,37 @@ namespace Betfair.ESAConsoleApp {
         private static bool _traceOrders;
         private static string _host = "stream-api-integration.betfair.com";
         private static int _port = 443;
+        private readonly ILogger<Program> _logger;
 
         private static void Main(string[] args) {
+
+            var host = Host.CreateDefaultBuilder(args)
+               .ConfigureLogging(logging => {
+                   logging.ClearProviders();
+                   logging.AddSerilog(new LoggerConfiguration()
+                       .MinimumLevel.Debug()
+                       .WriteTo.File(@"C:\logs\log-.txt", rollingInterval: RollingInterval.Day)
+                       .CreateLogger());
+               })
+               .ConfigureServices((context, services) => {
+                   
+                   services.AddSingleton<Program>();
+                   
+               })
+               .Build();
+
+            // Run the app by resolving services
+            var program = host.Services.GetRequiredService<Program>();
+            
+            program.Run(args);
+
+        }
+
+        public void Run(string[] args)
+        {
+
+            _logger.LogInformation("Application started");
+
             var traceListener = new ConsoleTraceListener();
             traceListener.TraceOutputOptions = TraceOptions.DateTime;
             Trace.Listeners.Add(traceListener);
@@ -27,10 +60,16 @@ namespace Betfair.ESAConsoleApp {
             var commands = new NCommands();
             commands.Context.Configuration.Notation = ParserNotation.Unix;
 
-            while (true) {
+            while (true)
+            {
                 commands.RunConsole(args);
                 StopTracing();
             }
+        }
+
+        public Program(ILogger<Program> logger)
+        {
+            _logger = logger;
         }
 
         static Program() {
@@ -148,7 +187,7 @@ namespace Betfair.ESAConsoleApp {
         }
 
         [Command(description: "Sets the host & port")]
-        public void Host(
+        public void SetHost(
             [Argument(defaultValue: "stream-api-integration.betfair.com")]
             string host,
             [Argument(defaultValue: 443)]

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.ESAClient", "Betfair.ESAClient\Betfair.ESAClient.csproj", "{C6F11E1B-DA85-41BC-9DEE-B941D3C6A805}"
 EndProject
@@ -9,7 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.ESAConsoleApp", "Be
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.ESAClient.Test", "Betfair.ESAClient.Test\Betfair.ESAClient.Test.csproj", "{19CC59D3-3664-4AA7-919A-CB39470976EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.ESASwagger", "Betfair.ESASwagger\Betfair.ESASwagger.csproj", "{84A4F60C-5348-4EA0-849C-E6A1B204EC28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.ESASwagger", "Betfair.ESASwagger\Betfair.ESASwagger.csproj", "{84A4F60C-5348-4EA0-849C-E6A1B204EC28}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingStrategies", "TradingStrategies\TradingStrategies.csproj", "{BEB10E05-9D71-44E7-AF61-8B108A5B3BDF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{84A4F60C-5348-4EA0-849C-E6A1B204EC28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84A4F60C-5348-4EA0-849C-E6A1B204EC28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84A4F60C-5348-4EA0-849C-E6A1B204EC28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEB10E05-9D71-44E7-AF61-8B108A5B3BDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEB10E05-9D71-44E7-AF61-8B108A5B3BDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEB10E05-9D71-44E7-AF61-8B108A5B3BDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEB10E05-9D71-44E7-AF61-8B108A5B3BDF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
