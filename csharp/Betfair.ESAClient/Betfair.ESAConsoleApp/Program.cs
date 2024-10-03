@@ -56,24 +56,41 @@ namespace Betfair.ESAConsoleApp {
 
         // Static method to handle logging and DI
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.AddSerilog(new LoggerConfiguration()
-                        .MinimumLevel.Debug()
-                        .WriteTo.File(@"C:\logs\log-.txt", rollingInterval: RollingInterval.Day)
-                        .CreateLogger());
-                })
-                .ConfigureServices((context, services) =>
-                {
-                    // Register Program class as a singleton service
-                    services.AddSingleton<Program>();
-                    services.AddHostedService<App>(); // Register our new App class as a hosted service
-                });
+              Host.CreateDefaultBuilder(args)
+                  .ConfigureLogging(logging =>
+                  {
+                      logging.ClearProviders();
+                      logging.AddSerilog(new LoggerConfiguration()
+                          .MinimumLevel.Debug()
+                          .WriteTo.File(@"C:\logs\log-.txt", rollingInterval: RollingInterval.Day)
+                          .CreateLogger());
+                  })
+                  .ConfigureServices((context, services) =>
+                  {
+                      // Register Program class as a singleton service
+                      services.AddSingleton<Program>();
+
+                      // Register App as a hosted service
+                      services.AddSingleton<IHostedService, App>();
+
+                      // Configure session provider if settings are available
+                      if (!string.IsNullOrEmpty(Settings.Default.AppKey))
+                      {
+                          services.AddSingleton<AppKeyAndSessionProvider>(_ =>
+                          {
+                              return new AppKeyAndSessionProvider(
+                                  Settings.Default.SsoHost,
+                                  Settings.Default.AppKey,
+                                  Settings.Default.UserName,
+                                  Settings.Default.Password
+                              );
+                          });
+                      }
+                  });
 
 
-         static Program() {
+
+        static Program() {
             if (Settings.Default.AppKey != "") {
                 Console.WriteLine("Loading login details:");
                 NewSessionProvider(Settings.Default.SsoHost,
@@ -266,29 +283,29 @@ namespace Betfair.ESAConsoleApp {
         }
     }
 
-    internal class App : IHostedService
+    public class App : IHostedService
     {
-        private readonly Program _program;
         private readonly ILogger<App> _logger;
+        private readonly AppKeyAndSessionProvider _SessionProvider;
 
-        // Constructor for App class
-        public App(Program program, ILogger<App> logger)
+        public App(ILogger<App> logger, AppKeyAndSessionProvider sessionProvider)
         {
-            _program = program;
             _logger = logger;
+            _SessionProvider = sessionProvider;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
-            // Start the application
             _logger.LogInformation("App is starting...");
-            _program.Run(new string[0]); // Pass any arguments here if needed
-            return Task.CompletedTask;
+            // Perform the necessary startup logic here
+            // E.g., create a new session, subscribe to markets, etc.
+            _SessionProvider.GetOrCreateNewSession(); // Example usage of the session provider
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("App is stopping...");
+            // Perform any cleanup if necessary
             return Task.CompletedTask;
         }
     }
