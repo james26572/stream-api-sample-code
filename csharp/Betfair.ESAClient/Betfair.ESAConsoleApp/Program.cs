@@ -9,31 +9,23 @@ using Betfair.ESAConsoleApp.Properties;
 using ConsoleTables;
 using Tectil.NCommand;
 using Tectil.NCommand.Contract;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Serilog;
-using System.Threading.Tasks;
-using System.Threading;
 
-namespace Betfair.ESAConsoleApp {
-    internal class Program {
+
+using Serilog;
+namespace Betfair.ESAConsoleApp
+{
+    internal class Program
+    {
         private static AppKeyAndSessionProvider SessionProvider { get; set; }
         private static ClientCache _clientCache;
         private static bool _traceMarkets;
         private static bool _traceOrders;
         private static string _host = "stream-api-integration.betfair.com";
         private static int _port = 443;
-       
+        public static ILogger _logger { get; private set; }
 
-
-        
-
-        // This method will be called by our App class (which will be a hosted service)
-        public void Run(string[] args)
+        private static void Main(string[] args)
         {
-            
-
             var traceListener = new ConsoleTraceListener();
             traceListener.TraceOutputOptions = TraceOptions.DateTime;
             Trace.Listeners.Add(traceListener);
@@ -48,50 +40,19 @@ namespace Betfair.ESAConsoleApp {
             }
         }
 
-        public static void Main(string[] args)
+        static Program()
         {
-            // Build and run the host
-            CreateHostBuilder(args).Build().Run();
-        }
+            
+            _logger =  new LoggerConfiguration()
+                .MinimumLevel.Debug() 
+                .WriteTo.File(
+                    $@"C:Logs\log-.txt", 
+                    rollingInterval: RollingInterval.Day) 
+                .CreateLogger();
+            _logger.Information("Application started");
 
-        // Static method to handle logging and DI
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-              Host.CreateDefaultBuilder(args)
-                  .ConfigureLogging(logging =>
-                  {
-                      logging.ClearProviders();
-                      logging.AddSerilog(new LoggerConfiguration()
-                          .MinimumLevel.Debug()
-                          .WriteTo.File(@"C:\logs\log-.txt", rollingInterval: RollingInterval.Day)
-                          .CreateLogger());
-                  })
-                  .ConfigureServices((context, services) =>
-                  {
-                      // Register Program class as a singleton service
-                      services.AddSingleton<Program>();
-
-                      // Register App as a hosted service
-                      services.AddSingleton<IHostedService, App>();
-
-                      // Configure session provider if settings are available
-                      if (!string.IsNullOrEmpty(Settings.Default.AppKey))
-                      {
-                          services.AddSingleton<AppKeyAndSessionProvider>(_ =>
-                          {
-                              return new AppKeyAndSessionProvider(
-                                  Settings.Default.SsoHost,
-                                  Settings.Default.AppKey,
-                                  Settings.Default.UserName,
-                                  Settings.Default.Password
-                              );
-                          });
-                      }
-                  });
-
-
-
-        static Program() {
-            if (Settings.Default.AppKey != "") {
+            if (Settings.Default.AppKey != "")
+            {
                 Console.WriteLine("Loading login details:");
                 NewSessionProvider(Settings.Default.SsoHost,
                     Settings.Default.AppKey,
@@ -100,7 +61,8 @@ namespace Betfair.ESAConsoleApp {
             }
         }
 
-        public static void NewSessionProvider(string ssohost, string appkey, string username, string password) {
+        public static void NewSessionProvider(string ssohost, string appkey, string username, string password)
+        {
             var sessionProvider = new AppKeyAndSessionProvider(ssohost,
                 appkey,
                 username,
@@ -108,10 +70,14 @@ namespace Betfair.ESAConsoleApp {
             SessionProvider = sessionProvider;
         }
 
-        public static ClientCache ClientCache {
-            get {
-                if (_clientCache == null) {
-                    if (SessionProvider == null) {
+        public static ClientCache ClientCache
+        {
+            get
+            {
+                if (_clientCache == null)
+                {
+                    if (SessionProvider == null)
+                    {
                         Console.Error.WriteLine("****************************************");
                         Console.Error.WriteLine("**** No Login Saved - Use SaveLogin ****");
                         Console.Error.WriteLine("****************************************");
@@ -128,30 +94,34 @@ namespace Betfair.ESAConsoleApp {
             }
         }
 
-        private static void OnOrderMarketChanged(object sender, OrderMarketChangedEventArgs e) {
+        private static void OnOrderMarketChanged(object sender, OrderMarketChangedEventArgs e)
+        {
             if (!_traceOrders)
                 return;
             PrintOrderMarket(e.Snap);
         }
 
-        private static void PrintOrderMarket(OrderMarketSnap market) {
+        private static void PrintOrderMarket(OrderMarketSnap market)
+        {
             Console.WriteLine("Orders (marketid={0}):", market.MarketId);
             ConsoleTable.From(market.OrderMarketRunners.SelectMany(r => r.UnmatchedOrders.Values))
                 .Write();
         }
 
-        private static void OnMarketChanged(object sender, MarketChangedEventArgs e) {
+        private static void OnMarketChanged(object sender, MarketChangedEventArgs e)
+        {
             if (!_traceMarkets)
                 return;
-            //logic here to write market snapshots to concurrent queue to pass to a trading strategy
             PrintMarket(e.Snap);
         }
 
-        private static LevelPriceSize GetLevel(IList<LevelPriceSize> values, int level) {
+        private static LevelPriceSize GetLevel(IList<LevelPriceSize> values, int level)
+        {
             return values.ElementAtOrDefault(0) ?? new LevelPriceSize(level, 0, 0);
         }
 
-        private static void PrintMarket(MarketSnap market) {
+        private static void PrintMarket(MarketSnap market)
+        {
             var table = new ConsoleTable("market",
                 "runner",
                 "atb",
@@ -160,7 +130,8 @@ namespace Betfair.ESAConsoleApp {
                 null,
                 null,
                 null);
-            foreach (var runner in market.MarketRunners.OrderBy(mr => mr.Definition.SortPriority)) {
+            foreach (var runner in market.MarketRunners.OrderBy(mr => mr.Definition.SortPriority))
+            {
                 var snap = runner.Prices;
                 table.AddRow(null,
                     runner.RunnerId.SelectionId,
@@ -188,7 +159,8 @@ namespace Betfair.ESAConsoleApp {
             [Argument(description: "user name")]
             string username,
             [Argument(description: "password")]
-            string password) {
+            string password)
+        {
             Settings.Default.SsoHost = ssohost;
             Settings.Default.AppKey = appkey;
             Settings.Default.UserName = username;
@@ -205,110 +177,94 @@ namespace Betfair.ESAConsoleApp {
         }
 
         [Command(description: "Sets the host & port")]
-        public void SetHost(
+        public void Host(
             [Argument(defaultValue: "stream-api-integration.betfair.com")]
             string host,
             [Argument(defaultValue: 443)]
-            int port) {
+            int port)
+        {
             _host = host;
             _port = port;
         }
 
 
         [Command(description: "Orders")]
-        public void Orders() {
+        public void Orders()
+        {
             ClientCache.SubscribeOrders();
         }
 
 
         [Command(description: "ListOrders")]
-        public void ListOrders() {
+        public void ListOrders()
+        {
             foreach (var market in ClientCache.OrderCache.Markets)
                 PrintOrderMarket(market.Snap);
         }
 
         [Command(description: "Market - subscribes to a market")]
-        public void Market(string marketid) {
-            ClientCache.SubscribeMarkets(marketid.Split(' '));
+        public void Market(string marketid)
+        {
+            ClientCache.SubscribeMarkets(marketid);
         }
 
         [Command(description: "Market Firehose- subscribes to all markets")]
-        public void MarketFireHose() {
+        public void MarketFireHose()
+        {
             ClientCache.SubscribeMarkets();
         }
 
 
         [Command(description: "ListMarkets")]
-        public void ListMarkets() {
+        public void ListMarkets()
+        {
             foreach (var market in ClientCache.MarketCache.Markets)
                 PrintMarket(market.Snap);
         }
 
         [Command(description: "Stops the connection")]
-        public void Stop() {
+        public void Stop()
+        {
             ClientCache.Stop();
         }
 
         [Command(description: "Starts the connection")]
-        public void Start() {
+        public void Start()
+        {
             ClientCache.Start();
         }
 
         [Command(description: "Disconnects the connection")]
-        public void Disconnect() {
+        public void Disconnect()
+        {
             ClientCache.Client.Disconnect();
         }
 
         [Command(description: "Trace Messages (markets and orders)")]
         public void TraceMessages(
             [Argument(defaultValue: 200)]
-            int truncate) {
+            int truncate)
+        {
             ClientCache.Client.TraceChangeTruncation = truncate;
         }
 
         [Command(description: "Trace Market Changes")]
-        public void TraceMarkets() {
+        public void TraceMarkets()
+        {
             _traceMarkets = true;
         }
 
         [Command(description: "Trace Order Changes")]
-        public void TraceOrders() {
+        public void TraceOrders()
+        {
             _traceOrders = true;
         }
 
-        public static void StopTracing() {
+        public static void StopTracing()
+        {
             _traceOrders = false;
             _traceMarkets = false;
             ClientCache.Client.TraceChangeTruncation = 0;
         }
     }
-
-    public class App : IHostedService
-    {
-        private readonly ILogger<App> _logger;
-        private readonly AppKeyAndSessionProvider _SessionProvider;
-
-        public App(ILogger<App> logger, AppKeyAndSessionProvider sessionProvider)
-        {
-            _logger = logger;
-            _SessionProvider = sessionProvider;
-        }
-
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("App is starting...");
-            // Perform the necessary startup logic here
-            // E.g., create a new session, subscribe to markets, etc.
-            _SessionProvider.GetOrCreateNewSession(); // Example usage of the session provider
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("App is stopping...");
-            // Perform any cleanup if necessary
-            return Task.CompletedTask;
-        }
-    }
-
-
 }
