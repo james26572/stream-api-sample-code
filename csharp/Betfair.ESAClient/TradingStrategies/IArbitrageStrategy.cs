@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Betfair.ESAClient.Cache;
 
 namespace TradingStrategies
 {
-    internal interface IArbitrageStrategy
+    public interface IArbitrageStrategy
     {
-        double market1Id { get; set; }
-        double market2Id { get; set; }
+        MarketSnap _marketSnap1 { get; set; }
+        MarketSnap _marketSnap2 { get; set; }
+        void EvaluateMarkets(MarketChangedEventArgs e);
+        
+        MarketRunnerSnap GetMarketRunnerSnap(MarketSnap snap, double runnerId);
 
     }
 }

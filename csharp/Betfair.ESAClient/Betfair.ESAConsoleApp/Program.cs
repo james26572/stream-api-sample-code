@@ -9,8 +9,7 @@ using Betfair.ESAConsoleApp.Properties;
 using ConsoleTables;
 using Tectil.NCommand;
 using Tectil.NCommand.Contract;
-
-
+using TradingStrategies;
 using Serilog;
 namespace Betfair.ESAConsoleApp
 {
@@ -23,6 +22,7 @@ namespace Betfair.ESAConsoleApp
         private static string _host = "stream-api-integration.betfair.com";
         private static int _port = 443;
         public static ILogger _logger { get; private set; }
+        private static ArbStrat _tradingStrategy { get; set; }
 
         private static void Main(string[] args)
         {
@@ -112,6 +112,7 @@ namespace Betfair.ESAConsoleApp
         {
             if (!_traceMarkets)
                 return;
+            _tradingStrategy.EvaluateMarkets(e);
             PrintMarket(e.Snap);
         }
 
@@ -205,7 +206,11 @@ namespace Betfair.ESAConsoleApp
         [Command(description: "Market - subscribes to a market")]
         public void Market(string marketid)
         {
-            ClientCache.SubscribeMarkets(marketid);
+            string[] marketIds = marketid.Split(' ');
+            ClientCache.SubscribeMarkets(marketIds);
+            
+
+
         }
 
         [Command(description: "Market Firehose- subscribes to all markets")]
@@ -220,6 +225,7 @@ namespace Betfair.ESAConsoleApp
         {
             foreach (var market in ClientCache.MarketCache.Markets)
                 PrintMarket(market.Snap);
+            _tradingStrategy = new ArbStrat(ClientCache.MarketCache.Markets.ElementAt(0).Snap, ClientCache.MarketCache.Markets.ElementAt(1).Snap);
         }
 
         [Command(description: "Stops the connection")]
