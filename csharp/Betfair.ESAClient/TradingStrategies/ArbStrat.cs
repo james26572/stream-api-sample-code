@@ -12,8 +12,8 @@ namespace TradingStrategies
         
         public MarketSnap _marketSnap1 { get; set; }
         public MarketSnap _marketSnap2 { get; set; }
+        
 
-       
         public ArbStrat(MarketSnap market1, MarketSnap market2)
         {
             _marketSnap1 = market1;
@@ -38,16 +38,17 @@ namespace TradingStrategies
 
             if (GetLevel(selectionSnap1.BestAvailableToBack, 0).Price > GetLevel(selectionSnap2.BestAvailableToLay,0).Price) {
                 //arb
-
+                Console.Beep(5000,5000);
                 return;
             }
             if (GetLevel(selectionSnap2.BestAvailableToBack, 0).Price > GetLevel(selectionSnap1.BestAvailableToLay, 0).Price)
             {
                 //arb
-
+                Console.Beep(5000,5000);
                 return;
             }
             Console.WriteLine("No arb found");
+            
 
         }
 
