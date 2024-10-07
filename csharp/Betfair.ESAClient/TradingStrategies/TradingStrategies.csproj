@@ -46,6 +46,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\APING\APING.csproj">
+      <Project>{BDB19578-1D6E-4BC3-99BC-D15387510AC5}</Project>
+      <Name>APING</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Betfair.ESAClient\Betfair.ESAClient.csproj">
       <Project>{c6f11e1b-da85-41bc-9dee-b941d3c6a805}</Project>
       <Name>Betfair.ESAClient</Name>

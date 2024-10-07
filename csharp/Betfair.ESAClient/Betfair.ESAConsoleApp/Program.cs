@@ -11,6 +11,10 @@ using Tectil.NCommand;
 using Tectil.NCommand.Contract;
 using TradingStrategies;
 using Serilog;
+using Api_ng_sample_code.TO;
+using Api_ng_sample_code.Json;
+using Api_ng_sample_code;
+
 namespace Betfair.ESAConsoleApp
 {
     internal class Program
@@ -23,6 +27,8 @@ namespace Betfair.ESAConsoleApp
         private static int _port = 443;
         public static ILogger _logger { get; private set; }
         private static ArbStrat _tradingStrategy { get; set; }
+        private static IClient _aping_client {  get; set; }
+        private static string Url = "https://api.betfair.com/exchange/betting";
 
         private static void Main(string[] args)
         {
@@ -58,6 +64,9 @@ namespace Betfair.ESAConsoleApp
                     Settings.Default.AppKey,
                     Settings.Default.UserName,
                     Settings.Default.Password);
+
+                _aping_client = new JsonRpcClient(Url, Settings.Default.AppKey, SessionProvider.session.Session);
+
             }
         }
 
@@ -225,7 +234,7 @@ namespace Betfair.ESAConsoleApp
         {
             foreach (var market in ClientCache.MarketCache.Markets)
                 PrintMarket(market.Snap);
-            _tradingStrategy = new ArbStrat(ClientCache.MarketCache.Markets.ElementAt(0).Snap, ClientCache.MarketCache.Markets.ElementAt(1).Snap);
+            _tradingStrategy = new ArbStrat(ClientCache.MarketCache.Markets.ElementAt(0).Snap, ClientCache.MarketCache.Markets.ElementAt(1).Snap, _aping_client);
         }
 
         [Command(description: "Stops the connection")]
