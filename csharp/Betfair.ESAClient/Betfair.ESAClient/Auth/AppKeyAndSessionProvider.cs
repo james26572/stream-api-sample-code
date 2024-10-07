@@ -20,7 +20,7 @@ namespace Betfair.ESAClient.Auth {
         private string _password;
         private string _username;
 
-        private AppKeyAndSession _session;
+        public AppKeyAndSession session;
 
         public const string SSO_HOST_COM = "identitysso.betfair.com";
         public const string SSO_HOST_IT = "identitysso.betfair.it";

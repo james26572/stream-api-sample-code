@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Betfair.ESAClient.Cache;
 
+using System.Security.Policy;
+using Api_ng_sample_code;
+
 namespace TradingStrategies
 {
     public class ArbStrat : IArbitrageStrategy
@@ -12,12 +15,13 @@ namespace TradingStrategies
         
         public MarketSnap _marketSnap1 { get; set; }
         public MarketSnap _marketSnap2 { get; set; }
-        
+        public IClient APINGClient { get; set; }
 
-        public ArbStrat(MarketSnap market1, MarketSnap market2)
+        public ArbStrat(MarketSnap market1, MarketSnap market2, IClient client)
         {
             _marketSnap1 = market1;
             _marketSnap2 = market2;
+            APINGClient = client;
         }
 
         
@@ -38,6 +42,7 @@ namespace TradingStrategies
 
             if (GetLevel(selectionSnap1.BestAvailableToBack, 0).Price > GetLevel(selectionSnap2.BestAvailableToLay,0).Price) {
                 //arb
+
                 Console.Beep(5000,5000);
                 return;
             }

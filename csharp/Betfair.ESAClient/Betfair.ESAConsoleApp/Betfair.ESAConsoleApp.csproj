@@ -36,6 +36,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,6 +61,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\APING\APING.csproj">
+      <Project>{bdb19578-1d6e-4bc3-99bc-d15387510ac5}</Project>
+      <Name>APING</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Betfair.ESAClient\Betfair.ESAClient.csproj">
       <Project>{C6F11E1B-DA85-41BC-9DEE-B941D3C6A805}</Project>
       <Name>Betfair.ESAClient</Name>
