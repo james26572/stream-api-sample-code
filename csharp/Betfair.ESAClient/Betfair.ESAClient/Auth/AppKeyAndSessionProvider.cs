@@ -62,11 +62,11 @@ namespace Betfair.ESAClient.Auth {
         /// <exception cref="IOException">Thrown if authentication call fails</exception>
         /// <returns></returns>
         public AppKeyAndSession GetOrCreateNewSession() {
-            if (_session != null) {
+            if (session != null) {
                 //have a cached session - is it expired
-                if ((_session.CreateTime + SessionExpireTime) > DateTime.UtcNow) {
+                if ((session.CreateTime + SessionExpireTime) > DateTime.UtcNow) {
                     Trace.TraceInformation("SSO Login - session not expired - re-using");
-                    return _session;
+                    return session;
                 }
                 else {
                     Trace.TraceInformation("SSO Login - session expired");
@@ -102,13 +102,13 @@ namespace Betfair.ESAClient.Auth {
 
             //got a response - decode
             if (sessionDetails != null && "SUCCESS".Equals(sessionDetails.status)) {
-                _session = new AppKeyAndSession(_appkey, sessionDetails.token);
+                session = new AppKeyAndSession(_appkey, sessionDetails.token);
             }
             else {
                 throw new InvalidCredentialException("SSO Authentication - response is fail: " + sessionDetails.error);
             }
 
-            return _session;
+            return session;
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Betfair.ESAClient.Auth {
         /// </summary>
         public void ExpireTokenNow() {
             Trace.TraceInformation("SSO Login - expiring session token now");
-            _session = null;
+            session = null;
         }
     }
 
