@@ -64,7 +64,7 @@ namespace Betfair.ESAConsoleApp
                     Settings.Default.AppKey,
                     Settings.Default.UserName,
                     Settings.Default.Password);
-
+                SessionProvider.GetOrCreateNewSession();
                 _aping_client = new JsonRpcClient(Url, Settings.Default.AppKey, SessionProvider.session.Session);
 
             }
@@ -183,6 +183,7 @@ namespace Betfair.ESAConsoleApp
                 password);
             //test it
             SessionProvider.GetOrCreateNewSession();
+            _aping_client = new JsonRpcClient(Url, Settings.Default.AppKey, SessionProvider.session.Session);
             Settings.Default.Save();
         }
 
