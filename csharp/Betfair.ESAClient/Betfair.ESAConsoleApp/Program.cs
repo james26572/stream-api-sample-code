@@ -23,7 +23,7 @@ namespace Betfair.ESAConsoleApp
         private static ClientCache _clientCache;
         private static bool _traceMarkets;
         private static bool _traceOrders;
-        private static string _host = "stream-api-integration.betfair.com";
+        private static string _host = "stream-api.betfair.com";
         private static int _port = 443;
         public static ILogger _logger { get; private set; }
         private static ArbStrat _tradingStrategy { get; set; }
